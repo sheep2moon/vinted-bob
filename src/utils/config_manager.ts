@@ -1,3 +1,4 @@
+import { removeBrandFromBrandsFile } from "./../brands_data.js";
 import dotenv from "dotenv";
 import { GlobalSettingsModel } from "../database.js";
 import { SocksProxyAgent } from "socks-proxy-agent";
@@ -74,6 +75,12 @@ class ConfigManager {
 
     public async addNewBrandToList(newBrand: Brand) {
         const newBrandsList = await addNewBrandToBrandsFile(newBrand);
+        if (newBrandsList) {
+            this.brands_list = newBrandsList;
+        }
+    }
+    public async removeBrandFromList(brand_key: number) {
+        const newBrandsList = await removeBrandFromBrandsFile(brand_key);
         if (newBrandsList) {
             this.brands_list = newBrandsList;
         }

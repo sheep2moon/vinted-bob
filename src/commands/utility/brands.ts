@@ -8,10 +8,16 @@ export const data = new SlashCommandBuilder()
     .addSubcommand(subcommand => subcommand.setName("lista").setDescription("Wyświetla liste marek"))
     .addSubcommand(subcommand =>
         subcommand
-            .setName("nowa")
+            .setName("dodaj_do_listy")
             .setDescription("Dodaje nową marke do listy wszystkich marek")
             .addStringOption(option => option.setName("brand_name").setDescription("Nazwa marki").setRequired(true))
             .addNumberOption(option => option.setName("brand_id").setDescription("ID marki z Vinted").setRequired(true).setMinValue(1))
+    )
+    .addSubcommand(subcommand =>
+        subcommand
+            .setName("usun_z_listy")
+            .setDescription("Usuwa wybraną marke z listy wszystkich marek")
+            .addNumberOption(option => option.setName("brand_key").setDescription("Numer marki z listy").setRequired(true).setMinValue(1))
     )
     .addSubcommand(subcommand =>
         subcommand
@@ -35,7 +41,7 @@ export const execute = async (interaction: ChatInputCommandInteraction) => {
 
             await interaction.reply(reply);
         }
-        if (interaction.options.getSubcommand() === "nowa") {
+        if (interaction.options.getSubcommand() === "dodaj_do_listy") {
             const new_brand_name = interaction.options.getString("brand_name");
             const new_brand_id = interaction.options.getNumber("brand_id");
             if (new_brand_id && new_brand_name) {
@@ -44,6 +50,18 @@ export const execute = async (interaction: ChatInputCommandInteraction) => {
                 const reply = `Dodano marke ${new_brand_name} o numerze ID ${new_brand_id} do listy wszystkich marek.`;
                 await interaction.reply(reply);
             }
+        }
+        if (interaction.options.getSubcommand() === "usun_z_listy") {
+            const brand_key = interaction.options.getNumber("brand_key");
+            const brand = Configuration.brands_list.find(brand => brand.key === brand_key);
+            if (!brand_key || !brand) {
+                const reply = `Nie znaleziono marki o podanym numerze`;
+                await interaction.reply(reply);
+                return;
+            }
+            await Configuration.removeBrandFromList(brand_key);
+            const reply = `Usunięto marke ${brand.name} o numerze ID ${brand.id} z listy wszystkich marek.`;
+            await interaction.reply(reply);
         }
         if (interaction.options.getSubcommand() === "aktywne") {
             const reply = [...Configuration.brands.map(brand => `${brand.key} - ${brand.name}`)].join("\n");
