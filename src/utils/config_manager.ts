@@ -3,6 +3,8 @@ import dotenv from "dotenv";
 import { GlobalSettingsModel } from "../database.js";
 import { SocksProxyAgent } from "socks-proxy-agent";
 import { addNewBrandToBrandsFile, getBrandsListFromFile } from "../brands_data.js";
+import { getCookie } from "../services/cookie_service.js";
+import { fetchCatalogItems, findHighestId } from "../services/vinted_service.js";
 dotenv.config();
 
 export type Config = {
@@ -10,6 +12,12 @@ export type Config = {
     min_price: number;
     max_price: number;
     dev_mode: boolean;
+    current_highest_id: number;
+    cookie: string;
+    custom_search: {
+        url: string;
+        keywords: string[];
+    };
     discordConfig: {
         client_id: string;
         token: string;
@@ -24,12 +32,18 @@ export type Config = {
     };
 };
 
-class ConfigManager {
+class ConfigManager<Config> {
     public brands: Brand[];
     public brands_list: Brand[];
     public dev_mode: boolean;
     public min_price: number;
+    public current_highest_id: number;
+    public cookie: string;
     public max_price: number;
+    public custom_search: {
+        url: string;
+        keywords: string[];
+    };
     public discordConfig: {
         client_id: string;
         token: string;
@@ -47,6 +61,10 @@ class ConfigManager {
         Object.assign(this, data);
     }
 
+    public setCurrentHighestId(id: number) {
+        this.current_highest_id = id;
+    }
+
     async addBrand(brand: Brand) {
         await GlobalSettingsModel.updateOne({ id: parseInt(Configuration.discordConfig.guild_id) }, { $addToSet: { brands: brand.id } });
         this.brands.push(brand);
@@ -56,9 +74,22 @@ class ConfigManager {
         this.brands = [...this.brands.filter(b => b.id !== brand.id)];
     }
 
-    // async updateBrands(brands: Brand[]) {
-    //     this.brands = brands;
-    // }
+    async refreshCookie() {
+        let found = false;
+        while (!found) {
+            try {
+                const cookie = await getCookie();
+                if (cookie) {
+                    found = true;
+                    this.cookie = cookie;
+                }
+            } catch (error) {
+                // Logger.debug('Error fetching cookie');
+                await new Promise(resolve => setTimeout(resolve, 200));
+            }
+        }
+    }
+
     async updateMinPrice(minPrice: number) {
         this.min_price = minPrice;
         await GlobalSettingsModel.updateOne({ id: Configuration.discordConfig.guild_id }, { max_price: minPrice });
@@ -89,7 +120,9 @@ class ConfigManager {
         }
     }
 
-    async populateData() {
+    async Init() {
+        const { items } = await fetchCatalogItems(Configuration.cookie);
+        this.current_highest_id = findHighestId(items);
         let settings = await GlobalSettingsModel.findOne({ id: Configuration.discordConfig.guild_id });
         const brandsList = await getBrandsListFromFile();
         this.brands_list = brandsList;
@@ -109,7 +142,7 @@ class ConfigManager {
     }
 }
 
-export const Configuration = new ConfigManager({
+export const Configuration: ConfigManager<Config> = new ConfigManager({
     brands: [],
     min_price: 0,
     max_price: 9999,
@@ -125,5 +158,9 @@ export const Configuration = new ConfigManager({
         username: process.env.PROXY_USERNAME || "",
         password: process.env.PROXY_PASSWORD || ""
     },
-    dev_mode: process.env.DEV_MODE ? true : false
+    dev_mode: process.env.DEV_MODE ? true : false,
+    custom_search: {
+        url: "",
+        keywords: []
+    }
 });

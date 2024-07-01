@@ -1,6 +1,6 @@
 import { fetchCookie } from "./src/services/cookie_service.js";
 import { enqueueMessage } from "./src/services/discord_service.js";
-import { fetchCatalogItems, fetchItemDetails, findHighestId } from "./src/services/vinted_service.js";
+import { fetchCatalogItems, fetchItemDetails, findHighestId, searchAndPostItems } from "./src/services/vinted_service.js";
 import { makeGetRequest } from "./src/utils/http_utils.js";
 import { parseItem } from "./src/utils/parse_item.js";
 import { createItemEmbed, createVintedItemActionRow } from "./src/utils/embed_builders.js";
@@ -11,73 +11,19 @@ import { Logger } from "./src/utils/logger.js";
 import { Configuration } from "./src/utils/config_manager.js";
 dotenv.config();
 
-const getCookie = async () => {
-    const c = await fetchCookie("https://www.vinted.pl/catalog?");
-    return c.cookie;
-};
-
-const refreshCookie = async () => {
-    let found = false;
-    while (!found) {
-        try {
-            const cookie = await getCookie();
-            if (cookie) {
-                found = true;
-                return cookie;
-            }
-        } catch (error) {
-            // Logger.debug('Error fetching cookie');
-            await new Promise(resolve => setTimeout(resolve, 200));
-        }
-    }
-};
-
 async function startBot() {
-    botCommandsInit();
-    let cookie = await getCookie();
+    await botCommandsInit();
     await databaseInit();
-    await Configuration.populateData();
+    await Configuration.Init();
 
-    /**FETCHING NEW ITEMS */
-    const { items } = await fetchCatalogItems(cookie);
-    let currentHighestId = findHighestId(items);
     setInterval(async () => {
-        const { items } = await fetchCatalogItems(cookie);
-        if (items && items.length > 0) {
-            let matchingItems = [];
-            for (let i = 0; i < 30; i++) {
-                if (parseInt(items[i].id) > currentHighestId) matchingItems.push(items[i]);
-                else break;
-            }
-            currentHighestId = findHighestId(items);
-
-            matchingItems.forEach(async i => {
-                const item = await fetchItemDetails(cookie, i.id);
-                const parsedItem = parseItem(item);
-                if (!parsedItem) {
-                    Logger.error("Problem with item parsing");
-                    return;
-                }
-                const { embed, photosEmbeds } = await createItemEmbed(parsedItem);
-                const actionButtons = await createVintedItemActionRow(parsedItem);
-                enqueueMessage({
-                    content: `<@everyone> ${parsedItem.title}`,
-                    embeds: [embed, ...photosEmbeds],
-                    components: [actionButtons]
-                });
-            });
-        }
-        console.log("Fetching new items");
+        await searchAndPostItems();
+        console.log("searchAndPostItems");
     }, 3000);
 
     setInterval(async () => {
-        try {
-            cookie = (await refreshCookie()) || "";
-            Logger.info("Cookie REFRESH");
-        } catch (error) {
-            Logger.info("Error refreshing cookie");
-        }
-    }, 60000 * 5); // 60 seconds
+        await Configuration.refreshCookie();
+    }, 60000 * 5); // 60seconds * 5
 }
 
 startBot();

@@ -19,3 +19,8 @@ export async function fetchCookie(url: string) {
 
     throw new Error("No cookies found in the headers.");
 }
+
+export const getCookie = async () => {
+    const c = await fetchCookie("https://www.vinted.pl/catalog?");
+    return c.cookie;
+};
