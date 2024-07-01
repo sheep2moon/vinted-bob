@@ -30,21 +30,3 @@ export const parseItem = (item: any) => {
         return parsedItem;
     }
 };
-
-// photo_details: {
-//     id: item.photo.id,
-//     height: item.photo.height,
-//     width: item.photo.width,
-//     url: item.photo.url,
-//     fullSizeUrl: item.photo.full_size_url,
-//     imageNo: item.photo.image_no
-// }
-
-// photo_details: {
-//     id: number;
-//     imageNo: number;
-//     width: number;
-//     height: number;
-//     url: string;
-//     fullSizeUrl: string;
-// };

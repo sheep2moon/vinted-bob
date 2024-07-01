@@ -13,15 +13,12 @@ export async function fetchCatalogItems(cookie: string) {
     const brandsQuery = Configuration.brands.map(brand => `brand_ids[]=${brand.id}`).join("&");
     const priceQuery = `price_from=${Configuration.min_price}&currency=PLN&price_to=${Configuration.max_price}`;
     const url = `https://www.vinted.pl/api/v2/catalog/items?per_page=30&order=newest_first&${brandsQuery}&${priceQuery}`;
+    console.log(url);
+
     const headers = { Cookie: cookie };
     let response: CatalogItemsResponse | undefined = undefined;
     response = await makeGetRequest(url, headers);
     if (response) return { items: response.body.items };
-    // while (!response) {
-    //     response = await makeGetRequest(url, headers);
-    //     console.log("fetchCatalogItems - undefined... Retrying after 1sec.");
-    //     setTimeout(() => {}, 1000);
-    // }
     return { items: [] };
 }
 

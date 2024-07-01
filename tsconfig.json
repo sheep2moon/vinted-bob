@@ -8,7 +8,12 @@
     "lib": ["ES2016","ES6","ES5"],
     "moduleResolution": "NodeNext",
     "strictPropertyInitialization": false,
-  }
+    "paths": {
+      "*": ["./src/types/*.d.ts"]
+    }
+  },
+  
+  
 }
 
 

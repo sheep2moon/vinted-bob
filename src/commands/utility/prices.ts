@@ -1,8 +1,6 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder } from "discord.js";
-import { GlobalSettingsModel, brandsData } from "../../database.js";
 import { Logger } from "../../utils/logger.js";
 import { Configuration } from "../../utils/config_manager.js";
-import { getBrands } from "../../utils/crud.js";
 
 export const data = new SlashCommandBuilder()
     .setName("prices")

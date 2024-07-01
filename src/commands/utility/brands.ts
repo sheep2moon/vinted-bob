@@ -1,26 +1,23 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder } from "discord.js";
-import { GlobalSettingsModel, brandsData } from "../../database.js";
 import { Logger } from "../../utils/logger.js";
 import { Configuration } from "../../utils/config_manager.js";
-import { getBrands } from "../../utils/crud.js";
 
 export const data = new SlashCommandBuilder()
     .setName("brands")
     .setDescription("Wyświetla dostępne marki produktów")
     .addSubcommand(subcommand => subcommand.setName("lista").setDescription("Wyświetla liste marek"))
-    .addSubcommand(
-        subcommand =>
-            subcommand
-                .setName("dodaj")
-                .setDescription("Dodaj marke do wyszukiwanych")
-                .addNumberOption(option => option.setName("brand_key").setDescription("Numer marki z listy").setRequired(true).setMinValue(1))
-        // .addNumberOption(option =>
-        //     option
-        //         .setName("brand_id")
-        //         .setDescription("ID marki")
-        //         .setRequired(true)
-        //         .addChoices(...brandsData.map(brand => ({ name: brand.name, value: brand.id })))
-        // )
+    .addSubcommand(subcommand =>
+        subcommand
+            .setName("nowa")
+            .setDescription("Dodaje nową marke do listy wszystkich marek")
+            .addStringOption(option => option.setName("brand_name").setDescription("Nazwa marki").setRequired(true))
+            .addNumberOption(option => option.setName("brand_id").setDescription("ID marki z Vinted").setRequired(true).setMinValue(1))
+    )
+    .addSubcommand(subcommand =>
+        subcommand
+            .setName("dodaj")
+            .setDescription("Dodaj marke do wyszukiwanych")
+            .addNumberOption(option => option.setName("brand_key").setDescription("Numer marki z listy").setRequired(true).setMinValue(1))
     )
     .addSubcommand(subcommand =>
         subcommand
@@ -33,8 +30,20 @@ export const data = new SlashCommandBuilder()
 export const execute = async (interaction: ChatInputCommandInteraction) => {
     try {
         if (interaction.options.getSubcommand() === "lista") {
-            const reply = [...brandsData.map(brand => `${brand.key} - ${brand.name}`)].join("\n");
+            const reply = [...Configuration.brands_list.map(brand => `${brand.key} - ${brand.name}`)].join("\n");
+            console.log(Configuration.brands_list);
+
             await interaction.reply(reply);
+        }
+        if (interaction.options.getSubcommand() === "nowa") {
+            const new_brand_name = interaction.options.getString("brand_name");
+            const new_brand_id = interaction.options.getNumber("brand_id");
+            if (new_brand_id && new_brand_name) {
+                const new_brand_key = Configuration.brands_list.length + 1;
+                await Configuration.addNewBrandToList({ id: new_brand_id, name: new_brand_name, key: new_brand_key });
+                const reply = `Dodano marke ${new_brand_name} o numerze ID ${new_brand_id} do listy wszystkich marek.`;
+                await interaction.reply(reply);
+            }
         }
         if (interaction.options.getSubcommand() === "aktywne") {
             const reply = [...Configuration.brands.map(brand => `${brand.key} - ${brand.name}`)].join("\n");
@@ -42,7 +51,7 @@ export const execute = async (interaction: ChatInputCommandInteraction) => {
         }
         if (interaction.options.getSubcommand() === "dodaj") {
             const brand_key = interaction.options.getNumber("brand_key");
-            const brand = brandsData.find(brand => brand.key === brand_key);
+            const brand = Configuration.brands_list.find(brand => brand.key === brand_key);
             if (!brand) {
                 await interaction.reply("Nie znaleziono marki o podanym numerze.");
                 return;
@@ -57,7 +66,7 @@ export const execute = async (interaction: ChatInputCommandInteraction) => {
         }
         if (interaction.options.getSubcommand() === "usun") {
             const brand_key = interaction.options.getNumber("brand_key");
-            const brand = brandsData.find(brand => brand.key === brand_key);
+            const brand = Configuration.brands_list.find(brand => brand.key === brand_key);
             if (!brand) {
                 await interaction.reply("Nie znaleziono marki o podanym numerze.");
                 return;

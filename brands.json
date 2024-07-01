@@ -1,6 +1,6 @@
 [
     {
-        "id": 5013,
+        "id": 180798,
         "name": "Acne Studios",
         "key": 1
     },
@@ -203,5 +203,15 @@
         "id": 4756790,
         "name": "Isabel Marant Etoile",
         "key": 41
+    },
+    {
+        "id": 5483,
+        "name": "Max Mara",
+        "key": 42
+    },
+    {
+        "id": 313266,
+        "name": "Weekend Max Mara",
+        "key": 43
     }
 ]

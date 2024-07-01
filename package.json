@@ -4,7 +4,8 @@
     "type": "module",
     "main": "index.js",
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "start": "npx tsx ./main.ts"
     },
     "keywords": [],
     "author": "",
@@ -12,7 +13,8 @@
     "description": "",
     "devDependencies": {
         "@types/random-useragent": "^0.3.3",
-        "typescript": "^5.4.5"
+        "typescript": "^5.4.5",
+        "tsx": "4.15.7"
     },
     "dependencies": {
         "axios": "^1.7.2",

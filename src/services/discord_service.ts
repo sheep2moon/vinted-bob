@@ -1,21 +1,6 @@
-import dotenv from "dotenv";
 import axios from "axios";
-import { ActionRowBuilder, AnyComponentBuilder, Client, EmbedBuilder, GatewayIntentBits, IntentsBitField } from "discord.js";
+import { ActionRowBuilder, AnyComponentBuilder, EmbedBuilder } from "discord.js";
 import { Configuration } from "../utils/config_manager.js";
-
-// export type DiscordConfig = {
-//     client_id: string;
-//     token: string;
-//     admin_id: string;
-//     guild_id: string;
-// };
-
-// export const discordConfig = {
-//     client_id: process.env.DISCORD_CLIENT_ID || "",
-//     token: process.env.DISCORD_TOKEN || "",
-//     admin_id: process.env.DISCORD_ADMIN_ID || "",
-//     guild_id: process.env.DISCORD_GUILD_ID || ""
-// };
 
 export async function postMessageToChannel(content: string, embeds: EmbedBuilder[] | undefined, components: ActionRowBuilder<AnyComponentBuilder>[] | undefined) {
     const url = `https://discord.com/api/v10/channels/1252290704017719479/messages`;

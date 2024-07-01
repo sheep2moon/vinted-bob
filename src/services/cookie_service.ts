@@ -1,4 +1,5 @@
 import axios from "axios";
+import { Logger } from "../utils/logger.js";
 
 export async function fetchCookie(url: string) {
     const response = await axios(url);
@@ -8,7 +9,7 @@ export async function fetchCookie(url: string) {
         const vintedCookie = cookies.find(cookie => cookie.startsWith("_vinted_fr_session"));
         if (vintedCookie) {
             const cookie = vintedCookie.split(";")[0];
-            // Logger.debug(`Fetched cookie: ${cookie}`);
+            Logger.info(`Fetched cookie: ${cookie}`);
 
             return { cookie: cookie };
         } else {

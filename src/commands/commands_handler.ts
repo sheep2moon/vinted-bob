@@ -2,14 +2,16 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { Logger } from "../utils/logger.js";
-import { ChatInputCommandInteraction, Client, Interaction, REST, Routes } from "discord.js";
-import { Config } from "../utils/config_manager.js";
+import { Client, Interaction, REST, Routes } from "discord.js";
+import { Config, Configuration } from "../utils/config_manager.js";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+// const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const __dirname = Configuration.dev_mode ? path.dirname(fileURLToPath(import.meta.url)) : "/app/dist/src/commands";
 const commandFiles = fs.readdirSync(path.join(__dirname, "utility")).filter(file => file.endsWith(".js"));
 
 async function loadCommands() {
     const commands: any[] = [];
+
     for (const file of commandFiles) {
         Logger.info("Import command");
         const module = await import(`./utility/${file}`);

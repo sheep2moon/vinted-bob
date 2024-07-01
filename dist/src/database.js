@@ -1,12 +1,10 @@
 import dotenv from "dotenv";
 import mongoose, { Schema, model } from "mongoose";
 import { Logger } from "./utils/logger.js";
-import { readFile } from "fs/promises";
 dotenv.config();
 const mongoConfig = {
     uri: process.env.MONGODB_URI
 };
-export const brandsData = JSON.parse(await readFile("brands.json", "utf-8"));
 export const databaseInit = async () => {
     if (!mongoConfig.uri) {
         Logger.error("No mongodb_uri provided.");

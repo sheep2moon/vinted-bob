@@ -1,17 +1,12 @@
 import dotenv from "dotenv";
 import mongoose, { Schema, model } from "mongoose";
 import { Logger } from "./utils/logger.js";
-import { readFile } from "fs/promises";
-import path from "path";
-import { Configuration } from "./utils/config_manager.js";
-import { getBrands } from "./utils/crud.js";
+
 dotenv.config();
 
 const mongoConfig = {
     uri: process.env.MONGODB_URI
 };
-
-export const brandsData: Brand[] = JSON.parse(await readFile("brands.json", "utf-8"));
 
 export const databaseInit = async () => {
     if (!mongoConfig.uri) {
@@ -23,12 +18,6 @@ export const databaseInit = async () => {
         .connect(mongoConfig.uri)
         .then(() => Logger.info("Connected to DB"))
         .catch(err => Logger.error(err));
-};
-
-export type Brand = {
-    id: number;
-    name: string;
-    key: number;
 };
 
 export type GlobalSettings = {

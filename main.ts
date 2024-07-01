@@ -37,36 +37,34 @@ async function startBot() {
     let cookie = await getCookie();
     await databaseInit();
     await Configuration.populateData();
-    const { items } = await fetchCatalogItems(cookie);
-    // console.log(items);
-    let currentHighestId = findHighestId(items);
 
-    setInterval(async () => {
-        const { items } = await fetchCatalogItems(cookie);
-        if (items && items.length > 0) {
-            let matchingItems = [];
-            for (let i = 0; i < 30; i++) {
-                if (parseInt(items[i].id) > currentHighestId) matchingItems.push(items[i]);
-                else break;
-            }
-            currentHighestId = findHighestId(items);
+    /**FETCHING NEW ITEMS */
+    // const { items } = await fetchCatalogItems(cookie);
+    // let currentHighestId = findHighestId(items);
+    // setInterval(async () => {
+    //     const { items } = await fetchCatalogItems(cookie);
+    //     if (items && items.length > 0) {
+    //         let matchingItems = [];
+    //         for (let i = 0; i < 30; i++) {
+    //             if (parseInt(items[i].id) > currentHighestId) matchingItems.push(items[i]);
+    //             else break;
+    //         }
+    //         currentHighestId = findHighestId(items);
 
-            matchingItems.forEach(async i => {
-                // console.log(parseItem(item));
-                const item = await fetchItemDetails(cookie, i.id);
-                const parsedItem = parseItem(item);
-                if (!parsedItem) {
-                    Logger.error("Problem with item parsing");
-                    return;
-                }
-                const { embed, photosEmbeds } = await createItemEmbed(parsedItem);
-                const actionButtons = await createVintedItemActionRow(parsedItem);
-                postMessageToChannel(`<@everyone> ${parsedItem.title}`, [embed, ...photosEmbeds], [actionButtons]);
-            });
-            // console.log("Filtered Items IDs: ", [...matchingItems.map(item => item.id)], "CurrentHighest: ", currentHighestId);
-        }
-        console.log("Fetching new items");
-    }, 3000);
+    //         matchingItems.forEach(async i => {
+    //             const item = await fetchItemDetails(cookie, i.id);
+    //             const parsedItem = parseItem(item);
+    //             if (!parsedItem) {
+    //                 Logger.error("Problem with item parsing");
+    //                 return;
+    //             }
+    //             const { embed, photosEmbeds } = await createItemEmbed(parsedItem);
+    //             const actionButtons = await createVintedItemActionRow(parsedItem);
+    //             postMessageToChannel(`<@everyone> ${parsedItem.title}`, [embed, ...photosEmbeds], [actionButtons]);
+    //         });
+    //     }
+    //     console.log("Fetching new items");
+    // }, 3000);
 
     setInterval(async () => {
         try {

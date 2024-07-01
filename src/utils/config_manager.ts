@@ -1,12 +1,14 @@
 import dotenv from "dotenv";
-import { Brand, GlobalSettingsModel, brandsData } from "../database.js";
+import { GlobalSettingsModel } from "../database.js";
 import { SocksProxyAgent } from "socks-proxy-agent";
+import { addNewBrandToBrandsFile, getBrandsListFromFile } from "../brands_data.js";
 dotenv.config();
 
 export type Config = {
     brands: Brand[];
     min_price: number;
     max_price: number;
+    dev_mode: boolean;
     discordConfig: {
         client_id: string;
         token: string;
@@ -23,6 +25,8 @@ export type Config = {
 
 class ConfigManager {
     public brands: Brand[];
+    public brands_list: Brand[];
+    public dev_mode: boolean;
     public min_price: number;
     public max_price: number;
     public discordConfig: {
@@ -68,18 +72,27 @@ class ConfigManager {
         return agent;
     }
 
+    public async addNewBrandToList(newBrand: Brand) {
+        const newBrandsList = await addNewBrandToBrandsFile(newBrand);
+        if (newBrandsList) {
+            this.brands_list = newBrandsList;
+        }
+    }
+
     async populateData() {
         let settings = await GlobalSettingsModel.findOne({ id: Configuration.discordConfig.guild_id });
+        const brandsList = await getBrandsListFromFile();
+        this.brands_list = brandsList;
         if (!settings) {
             await GlobalSettingsModel.create({
                 id: Configuration.discordConfig.guild_id,
                 min_price: 1,
                 max_price: 9999,
-                brands: brandsData.map(brand => brand.id)
+                brands: this.brands_list.map(brand => brand.id)
             });
             settings = await GlobalSettingsModel.findOne({ id: Configuration.discordConfig.guild_id });
         }
-        const activeBrands = brandsData.filter(brand => settings?.brands.includes(brand.id));
+        const activeBrands = this.brands_list.filter(brand => settings?.brands.includes(brand.id));
         this.brands = activeBrands;
         this.min_price = settings?.min_price || 0;
         this.max_price = settings?.max_price || 9999;
@@ -101,5 +114,6 @@ export const Configuration = new ConfigManager({
         port: parseInt(process.env.PORT || "80"),
         username: process.env.PROXY_USERNAME || "",
         password: process.env.PROXY_PASSWORD || ""
-    }
+    },
+    dev_mode: process.env.DEV_MODE ? true : false
 });
