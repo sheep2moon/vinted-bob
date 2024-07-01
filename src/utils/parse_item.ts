@@ -11,12 +11,31 @@ export type VintedItem = {
     description: string;
 };
 
-export const parseItem = (item: any) => {
+export type RawItem = {
+    id: string;
+    title: string;
+    total_item_price: number;
+    brand_dto: {
+        title: string;
+    };
+    user: {
+        login: string;
+    };
+    description: string;
+    photos: {
+        url: string;
+    }[];
+    size_title: string;
+    status: string;
+    url: string;
+};
+
+export const parseItem = (item: RawItem) => {
     console.log(item);
 
     if (item.id) {
         const parsedItem: VintedItem = {
-            id: item.id,
+            id: parseInt(item.id),
             title: item.title,
             price: item.total_item_price,
             brand_title: item.brand_dto.title,

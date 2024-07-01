@@ -1,7 +1,7 @@
 import axios from "axios";
 import { ActionRowBuilder, AnyComponentBuilder, EmbedBuilder } from "discord.js";
-import { Configuration } from "../utils/config_manager.js";
 import { Logger } from "../utils/logger.js";
+import { Configuration } from "../../main.js";
 
 type DiscordPostMessage = {
     content: string;
@@ -64,4 +64,4 @@ setInterval(async () => {
             await postMessageToChannel(message);
         }
     }
-}, 500);
+}, 1500);

@@ -3,10 +3,13 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { Logger } from "../utils/logger.js";
 import { Client, Interaction, REST, Routes } from "discord.js";
-import { Config, Configuration } from "../utils/config_manager.js";
+import { IConfig } from "../utils/config_manager.js";
+import { Configuration } from "../../main.js";
+import dotenv from "dotenv";
+dotenv.config();
 
 // const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const __dirname = Configuration.dev_mode ? path.dirname(fileURLToPath(import.meta.url)) : "/app/dist/src/commands";
+const __dirname = process.env.DEV_MODE ? path.dirname(fileURLToPath(import.meta.url)) : "/app/dist/src/commands";
 const commandFiles = fs.readdirSync(path.join(__dirname, "utility")).filter(file => file.endsWith(".js"));
 
 async function loadCommands() {
@@ -20,7 +23,7 @@ async function loadCommands() {
     return commands;
 }
 
-export async function registerCommands(client: Client, discordConfig: Config["discordConfig"]) {
+export async function registerCommands(client: Client, discordConfig: IConfig["discordConfig"]) {
     const commands = await loadCommands(); // Ensure all commands are loaded before registering
     const rest = new REST({ version: "10" }).setToken(discordConfig.token);
     try {

@@ -3,9 +3,10 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { Logger } from "../utils/logger.js";
 import { REST, Routes } from "discord.js";
-import { Configuration } from "../utils/config_manager.js";
+import dotenv from "dotenv";
+dotenv.config();
 // const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const __dirname = Configuration.dev_mode ? path.dirname(fileURLToPath(import.meta.url)) : "/app/dist/src/commands";
+const __dirname = process.env.DEV_MODE ? path.dirname(fileURLToPath(import.meta.url)) : "/app/dist/src/commands";
 const commandFiles = fs.readdirSync(path.join(__dirname, "utility")).filter(file => file.endsWith(".js"));
 async function loadCommands() {
     const commands = [];

@@ -1,7 +1,7 @@
-import { Configuration } from "./utils/config_manager.js";
 import { Client, Events, GatewayIntentBits } from "discord.js";
 import { Logger } from "./utils/logger.js";
 import { handleCommands, registerCommands } from "./commands/commands_handler.js";
+import { Configuration } from "../main.js";
 
 export const client = new Client({
     intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent]

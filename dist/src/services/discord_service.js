@@ -1,6 +1,11 @@
 import axios from "axios";
-import { Configuration } from "../utils/config_manager.js";
-export async function postMessageToChannel(content, embeds, components) {
+import { Logger } from "../utils/logger.js";
+import { Configuration } from "../../main.js";
+const messageQueue = [];
+export const enqueueMessage = (message) => {
+    messageQueue.push(message);
+};
+export async function postMessageToChannel(message) {
     const url = `https://discord.com/api/v10/channels/1252290704017719479/messages`;
     const headers = {
         Authorization: `Bot ${Configuration.discordConfig.token}`,
@@ -8,9 +13,9 @@ export async function postMessageToChannel(content, embeds, components) {
         "User-Agent": "DiscordBot (https://your-url.com, 1.0.0)"
     };
     const data = {
-        content,
-        embeds: embeds || [],
-        components: components || []
+        content: message.content,
+        embeds: message.embeds || [],
+        components: message.components || []
     };
     const options = {
         url,
@@ -34,8 +39,19 @@ export async function postMessageToChannel(content, embeds, components) {
         else if (code === 403) {
             throw new Error("Access forbidden.");
         }
+        else if (code === 429) {
+            Logger.error("Discord 429 too many requests");
+        }
         else {
             throw new Error(`Error posting message: ${error.message}`);
         }
     }
 }
+setInterval(async () => {
+    if (messageQueue.length > 0) {
+        const message = messageQueue.shift();
+        if (message) {
+            await postMessageToChannel(message);
+        }
+    }
+}, 500);

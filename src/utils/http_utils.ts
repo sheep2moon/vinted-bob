@@ -1,6 +1,5 @@
 import axios from "axios";
 import randomUserAgent from "random-useragent";
-import { Configuration } from "./config_manager.js";
 import { Logger } from "./logger.js";
 const PLATFORMS: { [key: string]: string } = {
     Windows: "Windows",

@@ -1,5 +1,9 @@
 import { makeGetRequest } from "../utils/http_utils.js";
-import { Configuration } from "../utils/config_manager.js";
+import { parseItem } from "../utils/parse_item.js";
+import { Logger } from "../utils/logger.js";
+import { createItemEmbed, createVintedItemActionRow } from "../utils/embed_builders.js";
+import { enqueueMessage } from "./discord_service.js";
+import { Configuration } from "../../main.js";
 export async function fetchCatalogItems(cookie) {
     const brandsQuery = Configuration.brands.map(brand => `brand_ids[]=${brand.id}`).join("&");
     const priceQuery = `price_from=${Configuration.min_price}&currency=PLN&price_to=${Configuration.max_price}`;
@@ -25,14 +29,35 @@ export async function fetchItemDetails(cookie, item_id) {
         setTimeout(() => { }, 1000);
     }
 }
-// export async function findHighestId(cookie: string) {
-//     const { items } = await fetchCatalogItems(cookie);
-//     if (!items) {
-//         throw new Error("Error fetching catalog items.");
-//     }
-//     const maxID = Math.max(...items.map(item => parseInt(item.id)));
-//     return maxID;
-// }
+export async function searchAndPostItems() {
+    const cookie = Configuration.cookie;
+    const { items } = await fetchCatalogItems(cookie);
+    if (items && items.length > 0) {
+        let matchingItems = [];
+        for (let i = 0; i < 30; i++) {
+            if (parseInt(items[i].id) > Configuration.current_highest_id)
+                matchingItems.push(items[i]);
+            else
+                break;
+        }
+        Configuration.setCurrentHighestId(findHighestId(items));
+        matchingItems.forEach(async (i) => {
+            const item = await fetchItemDetails(cookie, i.id);
+            const parsedItem = parseItem(item);
+            if (!parsedItem) {
+                Logger.error("Problem with item parsing");
+                return;
+            }
+            const { embed, photosEmbeds } = await createItemEmbed(parsedItem);
+            const actionButtons = await createVintedItemActionRow(parsedItem);
+            enqueueMessage({
+                content: `<@everyone> ${parsedItem.title}`,
+                embeds: [embed, ...photosEmbeds],
+                components: [actionButtons]
+            });
+        });
+    }
+}
 export function findHighestId(items) {
     return Math.max(...items.map(item => parseInt(item.id)));
 }

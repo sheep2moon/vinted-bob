@@ -1,5 +1,5 @@
+import { Configuration } from "../../main.js";
 import { GlobalSettingsModel } from "../database.js";
-import { Configuration } from "./config_manager.js";
 
 export const getActiveBrands = async () => {
     const settings = await GlobalSettingsModel.findOne({ id: Configuration.discordConfig.guild_id });

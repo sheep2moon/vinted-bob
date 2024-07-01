@@ -13,6 +13,17 @@ export const addNewBrandToBrandsFile = async (brand) => {
         return brands;
     }
     catch (error) {
-        Logger.error(`Error writing brands.json, ${error}`);
+        Logger.error(`Error writing brands.json during add, ${error}`);
+    }
+};
+export const removeBrandFromBrandsFile = async (brand_key) => {
+    const brands = await getBrandsListFromFile();
+    const new_brands = [...brands.filter(brand => brand.key !== brand_key)];
+    try {
+        await writeFile(brandsFilePath, JSON.stringify(new_brands, null, 2), "utf-8");
+        return new_brands;
+    }
+    catch (error) {
+        Logger.error(`Error writing brands.json during remove, ${error}`);
     }
 };

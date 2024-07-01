@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from "discord.js";
 import { Logger } from "../../utils/logger.js";
-import { Configuration } from "../../utils/config_manager.js";
+import { Configuration } from "../../../main.js";
 export const data = new SlashCommandBuilder()
     .setName("prices")
     .setDescription("Zarządzanie minimalną i maksymalną ceną wyszukiwania")
