@@ -2,7 +2,7 @@ export const parseItem = (item) => {
     console.log(item);
     if (item.id) {
         const parsedItem = {
-            id: item.id,
+            id: parseInt(item.id),
             title: item.title,
             price: item.total_item_price,
             brand_title: item.brand_dto.title,

@@ -2,11 +2,11 @@ import axios from "axios";
 import { Logger } from "../utils/logger.js";
 import { Configuration } from "../../main.js";
 const messageQueue = [];
-export const enqueueMessage = (message) => {
-    messageQueue.push(message);
+export const enqueueMessage = (post) => {
+    messageQueue.push(post);
 };
-export async function postMessageToChannel(message) {
-    const url = `https://discord.com/api/v10/channels/1252290704017719479/messages`;
+export const postMessageToChannel = async ({ message, channelId = "1252290704017719479" }) => {
+    const url = `https://discord.com/api/v10/channels/${channelId}/messages`;
     const headers = {
         Authorization: `Bot ${Configuration.discordConfig.token}`,
         "Content-Type": "application/json",
@@ -46,12 +46,12 @@ export async function postMessageToChannel(message) {
             throw new Error(`Error posting message: ${error.message}`);
         }
     }
-}
+};
 setInterval(async () => {
     if (messageQueue.length > 0) {
-        const message = messageQueue.shift();
-        if (message) {
-            await postMessageToChannel(message);
+        const post = messageQueue.shift();
+        if (post) {
+            await postMessageToChannel(post);
         }
     }
-}, 500);
+}, 1500);

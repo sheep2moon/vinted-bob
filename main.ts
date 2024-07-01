@@ -51,6 +51,7 @@ async function startBot() {
 
     if (Configuration.custom_search.url) {
         setInterval(async () => {
+            console.log("Adding SearchCustom TASK");
             TaskQueueManager.addToQueue(customSearchAndPostItems);
         }, 5000);
     }

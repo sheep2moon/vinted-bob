@@ -4,7 +4,7 @@ import { GlobalSettingsModel } from "../database.js";
 import { SocksProxyAgent } from "socks-proxy-agent";
 import { addNewBrandToBrandsFile, getBrandsListFromFile } from "../brands_data.js";
 import { getCookie } from "../services/cookie_service.js";
-import { fetchCatalogItems, findHighestId } from "../services/vinted_service.js";
+import { fetchCatalogItems, fetchCustomCatalogItems, findHighestId } from "../services/vinted_service.js";
 dotenv.config();
 export class ConfigManager {
     brands;
@@ -22,6 +22,9 @@ export class ConfigManager {
     }
     setCurrentHighestId(id) {
         this.current_highest_id = id;
+    }
+    setCustomSearchCurrentHighestId(id) {
+        this.custom_search.current_highest_id = id;
     }
     async addBrand(brand) {
         await GlobalSettingsModel.updateOne({ id: parseInt(this.discordConfig.guild_id) }, { $addToSet: { brands: brand.id } });
@@ -46,6 +49,14 @@ export class ConfigManager {
                 await new Promise(resolve => setTimeout(resolve, 200));
             }
         }
+    }
+    async updateCustomSearchUrl(url) {
+        this.custom_search.url = url;
+        await GlobalSettingsModel.updateOne({ id: this.discordConfig.guild_id }, { custom_search: { url, keywords: this.custom_search.keywords } });
+    }
+    async updateCustomSearchKeywords(keywords) {
+        this.custom_search.keywords = keywords;
+        await GlobalSettingsModel.updateOne({ id: this.discordConfig.guild_id }, { custom_search: { url: this.custom_search.url, keywords } });
     }
     async updateMinPrice(minPrice) {
         this.min_price = minPrice;
@@ -77,8 +88,10 @@ export class ConfigManager {
     }
     async Init() {
         await this.refreshCookie();
-        const { items } = await fetchCatalogItems(this.cookie);
-        this.current_highest_id = findHighestId(items);
+        const catalog_items = await fetchCatalogItems();
+        this.current_highest_id = findHighestId(catalog_items.items);
+        const custom_search_items = await fetchCustomCatalogItems();
+        this.custom_search.current_highest_id = findHighestId(custom_search_items.items);
         let settings = await GlobalSettingsModel.findOne({ id: this.discordConfig.guild_id });
         const brandsList = await getBrandsListFromFile();
         this.brands_list = brandsList;
@@ -87,7 +100,11 @@ export class ConfigManager {
                 id: this.discordConfig.guild_id,
                 min_price: 1,
                 max_price: 9999,
-                brands: this.brands_list.map(brand => brand.id)
+                brands: this.brands_list.map(brand => brand.id),
+                custom_search: {
+                    url: "",
+                    keywords: [""]
+                }
             });
             settings = await GlobalSettingsModel.findOne({ id: this.discordConfig.guild_id });
         }
@@ -95,5 +112,7 @@ export class ConfigManager {
         this.brands = activeBrands;
         this.min_price = settings?.min_price || 0;
         this.max_price = settings?.max_price || 9999;
+        this.custom_search.url = settings?.custom_search.url || "";
+        this.custom_search.keywords = settings?.custom_search.keywords || [""];
     }
 }

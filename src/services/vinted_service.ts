@@ -26,7 +26,7 @@ function findIdMatchingItems(items: RawItem[], highest_id: number) {
     return matchingItems;
 }
 
-async function postItems(items: RawItem[]) {
+async function postItems(items: RawItem[], channelId?: string) {
     items.forEach(async i => {
         const item = await fetchItemDetails(i.id);
         const parsedItem = parseItem(item);
@@ -37,9 +37,12 @@ async function postItems(items: RawItem[]) {
         const { embed, photosEmbeds } = await createItemEmbed(parsedItem);
         const actionButtons = await createVintedItemActionRow(parsedItem);
         enqueueMessage({
-            content: `<@everyone> ${parsedItem.title}`,
-            embeds: [embed, ...photosEmbeds],
-            components: [actionButtons]
+            message: {
+                content: `<@everyone> ${parsedItem.title}`,
+                embeds: [embed, ...photosEmbeds],
+                components: [actionButtons]
+            },
+            channelId
         });
     });
 }
@@ -91,7 +94,7 @@ export async function customSearchAndPostItems() {
         }
         if (matchingItems && matchingItems.length > 0) {
             Configuration.setCustomSearchCurrentHighestId(findHighestId(items));
-            postItems(matchingItems);
+            postItems(matchingItems, "1257446225196748800");
         }
     }
 }

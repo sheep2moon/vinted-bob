@@ -96,6 +96,15 @@ export class ConfigManager implements IConfig {
         }
     }
 
+    async updateCustomSearchUrl(url: string) {
+        this.custom_search.url = url;
+        await GlobalSettingsModel.updateOne({ id: this.discordConfig.guild_id }, { custom_search: { url, keywords: this.custom_search.keywords } });
+    }
+    async updateCustomSearchKeywords(keywords: string[]) {
+        this.custom_search.keywords = keywords;
+        await GlobalSettingsModel.updateOne({ id: this.discordConfig.guild_id }, { custom_search: { url: this.custom_search.url, keywords } });
+    }
+
     async updateMinPrice(minPrice: number) {
         this.min_price = minPrice;
         await GlobalSettingsModel.updateOne({ id: this.discordConfig.guild_id }, { max_price: minPrice });

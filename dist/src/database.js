@@ -19,6 +19,10 @@ const settingsSchema = new Schema({
     id: { type: Number, unique: true, default: 1252287305801007124 },
     brands: [{ type: Number }],
     min_price: { type: Number, min: 0, default: 0 },
-    max_price: { type: Number, default: 9999 }
+    max_price: { type: Number, default: 9999 },
+    custom_search: {
+        url: { type: String, default: "" },
+        keywords: [{ type: String }]
+    }
 });
 export const GlobalSettingsModel = model("GlobalSettings", settingsSchema);

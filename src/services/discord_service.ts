@@ -8,15 +8,19 @@ type DiscordPostMessage = {
     embeds: EmbedBuilder[] | undefined;
     components: ActionRowBuilder<AnyComponentBuilder>[] | undefined;
 };
-
-const messageQueue: DiscordPostMessage[] = [];
-
-export const enqueueMessage = (message: DiscordPostMessage) => {
-    messageQueue.push(message);
+type DiscordPost = {
+    message: DiscordPostMessage;
+    channelId?: string;
 };
 
-export async function postMessageToChannel(message: DiscordPostMessage) {
-    const url = `https://discord.com/api/v10/channels/1252290704017719479/messages`;
+const messageQueue: DiscordPost[] = [];
+
+export const enqueueMessage = (post: DiscordPost) => {
+    messageQueue.push(post);
+};
+
+export const postMessageToChannel = async ({ message, channelId = "1252290704017719479" }: DiscordPost) => {
+    const url = `https://discord.com/api/v10/channels/${channelId}/messages`;
 
     const headers = {
         Authorization: `Bot ${Configuration.discordConfig.token}`,
@@ -55,13 +59,13 @@ export async function postMessageToChannel(message: DiscordPostMessage) {
             throw new Error(`Error posting message: ${error.message}`);
         }
     }
-}
+};
 
 setInterval(async () => {
     if (messageQueue.length > 0) {
-        const message = messageQueue.shift();
-        if (message) {
-            await postMessageToChannel(message);
+        const post = messageQueue.shift();
+        if (post) {
+            await postMessageToChannel(post);
         }
     }
 }, 1500);

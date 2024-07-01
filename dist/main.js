@@ -1,4 +1,4 @@
-import { searchAndPostItems } from "./src/services/vinted_service.js";
+import { customSearchAndPostItems, searchAndPostItems } from "./src/services/vinted_service.js";
 import { databaseInit } from "./src/database.js";
 import dotenv from "dotenv";
 import { botCommandsInit } from "./src/client.js";
@@ -23,6 +23,7 @@ export const Configuration = new ConfigManager({
     },
     dev_mode: process.env.DEV_MODE ? true : false,
     custom_search: {
+        current_highest_id: 0,
         url: "",
         keywords: []
     },
@@ -43,6 +44,12 @@ async function startBot() {
         console.log("Adding SearchAndPostItem TASK");
         // await searchAndPostItems();
     }, 3000);
+    if (Configuration.custom_search.url) {
+        setInterval(async () => {
+            console.log("Adding SearchCustom TASK");
+            TaskQueueManager.addToQueue(customSearchAndPostItems);
+        }, 5000);
+    }
     setInterval(async () => {
         TaskQueueManager.addToQueue(Configuration.refreshCookie);
         console.log("Adding RefreshCookie TASK");
