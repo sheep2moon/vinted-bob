@@ -59,7 +59,7 @@ export const execute = async (interaction: ChatInputCommandInteraction) => {
                 await interaction.reply(reply);
                 return;
             }
-            await Configuration.removeBrandFromList(brand_key);
+            await Configuration.removeBrandFromList(brand);
             const reply = `Usunięto marke ${brand.name} o numerze klucza ${brand_key} z listy wszystkich marek.`;
             await interaction.reply(reply);
         }

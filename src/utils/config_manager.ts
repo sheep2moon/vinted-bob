@@ -79,10 +79,13 @@ class ConfigManager {
             this.brands_list = newBrandsList;
         }
     }
-    public async removeBrandFromList(brand_key: number) {
-        const newBrandsList = await removeBrandFromBrandsFile(brand_key);
+    public async removeBrandFromList(brand: Brand) {
+        const newBrandsList = await removeBrandFromBrandsFile(brand.key);
         if (newBrandsList) {
             this.brands_list = newBrandsList;
+        }
+        if (this.brands.find(b => b.id === brand.id)) {
+            this.deleteBrand(brand);
         }
     }
 
