@@ -47,7 +47,7 @@ export const execute = async (interaction: ChatInputCommandInteraction) => {
             if (new_brand_id && new_brand_name) {
                 const new_brand_key = Configuration.brands_list.length + 1;
                 await Configuration.addNewBrandToList({ id: new_brand_id, name: new_brand_name, key: new_brand_key });
-                const reply = `Dodano marke ${new_brand_name} o numerze ID ${new_brand_id} do listy wszystkich marek.`;
+                const reply = `Dodano marke ${new_brand_name} o numerze klucza ${new_brand_key} do listy wszystkich marek.`;
                 await interaction.reply(reply);
             }
         }
@@ -60,7 +60,7 @@ export const execute = async (interaction: ChatInputCommandInteraction) => {
                 return;
             }
             await Configuration.removeBrandFromList(brand_key);
-            const reply = `Usunięto marke ${brand.name} o numerze ID ${brand.id} z listy wszystkich marek.`;
+            const reply = `Usunięto marke ${brand.name} o numerze klucza ${brand_key} z listy wszystkich marek.`;
             await interaction.reply(reply);
         }
         if (interaction.options.getSubcommand() === "aktywne") {
