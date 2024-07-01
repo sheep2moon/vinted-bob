@@ -1,8 +1,21 @@
 import axios from "axios";
 import { ActionRowBuilder, AnyComponentBuilder, EmbedBuilder } from "discord.js";
 import { Configuration } from "../utils/config_manager.js";
+import { Logger } from "../utils/logger.js";
 
-export async function postMessageToChannel(content: string, embeds: EmbedBuilder[] | undefined, components: ActionRowBuilder<AnyComponentBuilder>[] | undefined) {
+type DiscordPostMessage = {
+    content: string;
+    embeds: EmbedBuilder[] | undefined;
+    components: ActionRowBuilder<AnyComponentBuilder>[] | undefined;
+};
+
+const messageQueue: DiscordPostMessage[] = [];
+
+export const enqueueMessage = (message: DiscordPostMessage) => {
+    messageQueue.push(message);
+};
+
+export async function postMessageToChannel(message: DiscordPostMessage) {
     const url = `https://discord.com/api/v10/channels/1252290704017719479/messages`;
 
     const headers = {
@@ -12,9 +25,9 @@ export async function postMessageToChannel(content: string, embeds: EmbedBuilder
     };
 
     const data = {
-        content,
-        embeds: embeds || [],
-        components: components || []
+        content: message.content,
+        embeds: message.embeds || [],
+        components: message.components || []
     };
 
     const options = {
@@ -36,8 +49,19 @@ export async function postMessageToChannel(content: string, embeds: EmbedBuilder
             throw new Error("Channel not found.");
         } else if (code === 403) {
             throw new Error("Access forbidden.");
+        } else if (code === 429) {
+            Logger.error("Discord 429 too many requests");
         } else {
             throw new Error(`Error posting message: ${error.message}`);
         }
     }
 }
+
+setInterval(async () => {
+    if (messageQueue.length > 0) {
+        const message = messageQueue.shift();
+        if (message) {
+            await postMessageToChannel(message);
+        }
+    }
+}, 500);

@@ -1,5 +1,5 @@
 import { fetchCookie } from "./src/services/cookie_service.js";
-import { postMessageToChannel } from "./src/services/discord_service.js";
+import { enqueueMessage } from "./src/services/discord_service.js";
 import { fetchCatalogItems, fetchItemDetails, findHighestId } from "./src/services/vinted_service.js";
 import { makeGetRequest } from "./src/utils/http_utils.js";
 import { parseItem } from "./src/utils/parse_item.js";
@@ -39,32 +39,36 @@ async function startBot() {
     await Configuration.populateData();
 
     /**FETCHING NEW ITEMS */
-    // const { items } = await fetchCatalogItems(cookie);
-    // let currentHighestId = findHighestId(items);
-    // setInterval(async () => {
-    //     const { items } = await fetchCatalogItems(cookie);
-    //     if (items && items.length > 0) {
-    //         let matchingItems = [];
-    //         for (let i = 0; i < 30; i++) {
-    //             if (parseInt(items[i].id) > currentHighestId) matchingItems.push(items[i]);
-    //             else break;
-    //         }
-    //         currentHighestId = findHighestId(items);
+    const { items } = await fetchCatalogItems(cookie);
+    let currentHighestId = findHighestId(items);
+    setInterval(async () => {
+        const { items } = await fetchCatalogItems(cookie);
+        if (items && items.length > 0) {
+            let matchingItems = [];
+            for (let i = 0; i < 30; i++) {
+                if (parseInt(items[i].id) > currentHighestId) matchingItems.push(items[i]);
+                else break;
+            }
+            currentHighestId = findHighestId(items);
 
-    //         matchingItems.forEach(async i => {
-    //             const item = await fetchItemDetails(cookie, i.id);
-    //             const parsedItem = parseItem(item);
-    //             if (!parsedItem) {
-    //                 Logger.error("Problem with item parsing");
-    //                 return;
-    //             }
-    //             const { embed, photosEmbeds } = await createItemEmbed(parsedItem);
-    //             const actionButtons = await createVintedItemActionRow(parsedItem);
-    //             postMessageToChannel(`<@everyone> ${parsedItem.title}`, [embed, ...photosEmbeds], [actionButtons]);
-    //         });
-    //     }
-    //     console.log("Fetching new items");
-    // }, 3000);
+            matchingItems.forEach(async i => {
+                const item = await fetchItemDetails(cookie, i.id);
+                const parsedItem = parseItem(item);
+                if (!parsedItem) {
+                    Logger.error("Problem with item parsing");
+                    return;
+                }
+                const { embed, photosEmbeds } = await createItemEmbed(parsedItem);
+                const actionButtons = await createVintedItemActionRow(parsedItem);
+                enqueueMessage({
+                    content: `<@everyone> ${parsedItem.title}`,
+                    embeds: [embed, ...photosEmbeds],
+                    components: [actionButtons]
+                });
+            });
+        }
+        console.log("Fetching new items");
+    }, 3000);
 
     setInterval(async () => {
         try {
