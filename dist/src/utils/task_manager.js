@@ -1,21 +1,30 @@
+import { Configuration } from "../../main.js";
+import { customSearchAndPostItems, searchAndPostItems } from "../services/vinted_service.js";
 export class TaskManager {
     taskQueue;
     interval;
     constructor(data) {
         Object.assign(this, data);
     }
-    addToQueue(fn) {
-        this.taskQueue.push(fn);
+    addToQueue(task) {
+        this.taskQueue.push(task);
     }
     processQueue() {
         setInterval(async () => {
             if (this.taskQueue.length > 0) {
-                const nextFn = this.taskQueue.shift();
-                console.log(nextFn);
-                if (!nextFn)
+                const nextTask = this.taskQueue.shift();
+                if (!nextTask)
                     return;
                 console.log("Running task");
-                await nextFn();
+                if (nextTask === "SEARCH") {
+                    await searchAndPostItems();
+                }
+                if (nextTask === "CUSTOM_SEARCH") {
+                    await customSearchAndPostItems();
+                }
+                if (nextTask === "REFRESH_COOKIE") {
+                    await Configuration.refreshCookie();
+                }
             }
         }, 1500);
     }

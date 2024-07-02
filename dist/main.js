@@ -1,4 +1,3 @@
-import { customSearchAndPostItems, searchAndPostItems } from "./src/services/vinted_service.js";
 import { databaseInit } from "./src/database.js";
 import dotenv from "dotenv";
 import { botCommandsInit } from "./src/client.js";
@@ -40,20 +39,20 @@ async function startBot() {
     await botCommandsInit();
     TaskQueueManager.processQueue();
     setInterval(async () => {
-        TaskQueueManager.addToQueue(searchAndPostItems);
+        TaskQueueManager.addToQueue("SEARCH");
         console.log("Adding SearchAndPostItem TASK");
         // await searchAndPostItems();
-    }, 3000);
+    }, 15000);
     if (Configuration.custom_search.url) {
         setInterval(async () => {
             console.log("Adding SearchCustom TASK");
-            TaskQueueManager.addToQueue(customSearchAndPostItems);
-        }, 5000);
+            TaskQueueManager.addToQueue("CUSTOM_SEARCH");
+        }, 10000);
     }
     setInterval(async () => {
-        TaskQueueManager.addToQueue(Configuration.refreshCookie);
+        TaskQueueManager.addToQueue("REFRESH_COOKIE");
         console.log("Adding RefreshCookie TASK");
         // await Configuration.refreshCookie();
-    }, 60000 * 5); // 60seconds * 5
+    }, 60000 * 1); // 60seconds * 5
 }
 startBot();

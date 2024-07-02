@@ -44,22 +44,20 @@ async function startBot() {
     TaskQueueManager.processQueue();
 
     setInterval(async () => {
-        TaskQueueManager.addToQueue(searchAndPostItems);
-        console.log("Adding SearchAndPostItem TASK");
-        // await searchAndPostItems();
-    }, 3000);
+        TaskQueueManager.addToQueue("SEARCH");
+        console.log("Adding Search TASK");
+    }, 4000);
 
     if (Configuration.custom_search.url) {
         setInterval(async () => {
             console.log("Adding SearchCustom TASK");
-            TaskQueueManager.addToQueue(customSearchAndPostItems);
-        }, 5000);
+            TaskQueueManager.addToQueue("CUSTOM_SEARCH");
+        }, 8000);
     }
 
     setInterval(async () => {
-        TaskQueueManager.addToQueue(Configuration.refreshCookie);
+        TaskQueueManager.addToQueue("REFRESH_COOKIE");
         console.log("Adding RefreshCookie TASK");
-        // await Configuration.refreshCookie();
     }, 60000 * 5); // 60seconds * 5
 }
 

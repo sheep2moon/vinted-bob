@@ -39,6 +39,7 @@ async function postItems(items, channelId) {
 }
 export async function fetchCatalogItemsByUrl(url) {
     const cookie = Configuration.cookie;
+    console.log("SEARCH cookie: ", cookie);
     const headers = { Cookie: cookie };
     let response = undefined;
     response = await makeGetRequest(url, headers);

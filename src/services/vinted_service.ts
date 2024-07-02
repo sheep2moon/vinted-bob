@@ -49,6 +49,8 @@ async function postItems(items: RawItem[], channelId?: string) {
 
 export async function fetchCatalogItemsByUrl(url: string): Promise<{ items: RawItem[] }> {
     const cookie = Configuration.cookie;
+    console.log("SEARCH cookie: ", cookie);
+
     const headers = { Cookie: cookie };
     let response: CatalogItemsResponse | undefined = undefined;
     response = await makeGetRequest(url, headers);
