@@ -8,9 +8,9 @@ export const data = new SlashCommandBuilder()
     .setDescription("Zarządzanie customowym wyszukiwaniem")
     .addSubcommand(subcommand =>
         subcommand
-            .setName("adres_url")
-            .setDescription("Ustaw adres URL Vinted z szukanymi parametrami")
-            .addStringOption(option => option.setName("url_adress").setDescription("Adres URL Vinted").setRequired(true))
+            .setName("url_query")
+            .setDescription("Ustaw parametry z Vinted")
+            .addStringOption(option => option.setName("url_query").setDescription("Query parameters").setRequired(true))
             .addStringOption(option => option.setName("keywords").setDescription("Słowa kluczowe oddzielone spacją, np: 530,550").setRequired(false))
     )
     .addSubcommand(subcommand =>
@@ -23,13 +23,13 @@ export const data = new SlashCommandBuilder()
 
 export const execute = async (interaction: ChatInputCommandInteraction) => {
     try {
-        if (interaction.options.getSubcommand() === "adres_url") {
-            const url = interaction.options.getString("url_adress");
+        if (interaction.options.getSubcommand() === "url_query") {
+            const url_query = interaction.options.getString("url_query");
             const keywords = interaction.options.getString("keywords")?.split(",");
-            if (url && isValidHttpUrl(url)) {
-                await Configuration.updateCustomSearchUrl(url);
+            if (url_query) {
+                await Configuration.updateCustomSearchUrl(url_query);
                 if (keywords) await Configuration.updateCustomSearchKeywords(keywords);
-                const reply = `Ustawiono wyszukiwanie przedmiotów - ${url}`;
+                const reply = `Ustawiono wyszukiwanie przedmiotów - ${url_query}`;
                 await interaction.reply(reply);
             }
             await interaction.reply("Coś poszło nie tak, sprawdź czy adres URL jest prawidłowy");

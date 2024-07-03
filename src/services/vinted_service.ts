@@ -47,7 +47,8 @@ async function postItems(items: RawItem[], channelId?: string) {
     });
 }
 
-export async function fetchCatalogItemsByUrl(url: string): Promise<{ items: RawItem[] }> {
+export async function fetchCatalogItemsByUrl(url_query: string): Promise<{ items: RawItem[] }> {
+    const url = `https://www.vinted.pl/api/v2/catalog/items?per_page=30&order=newest_first&${url_query}`;
     const cookie = Configuration.cookie;
     console.log("SEARCH cookie: ", cookie);
 
@@ -61,13 +62,13 @@ export async function fetchCatalogItemsByUrl(url: string): Promise<{ items: RawI
 export async function fetchCatalogItems() {
     const brandsQuery = Configuration.brands.map(brand => `brand_ids[]=${brand.id}`).join("&");
     const priceQuery = `price_from=${Configuration.min_price}&currency=PLN&price_to=${Configuration.max_price}`;
-    const url = `https://www.vinted.pl/api/v2/catalog/items?per_page=30&order=newest_first&${brandsQuery}&${priceQuery}`;
-    return await fetchCatalogItemsByUrl(url);
+    const url_query = `${brandsQuery}&${priceQuery}`;
+    return await fetchCatalogItemsByUrl(url_query);
 }
 
 export async function fetchCustomCatalogItems() {
-    const url = Configuration.custom_search.url;
-    return await fetchCatalogItemsByUrl(url);
+    const url_query = Configuration.custom_search.url;
+    return await fetchCatalogItemsByUrl(url_query);
 }
 
 export async function fetchItemDetails(item_id: string) {
